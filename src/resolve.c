@@ -313,7 +313,7 @@ void resolveClients(const bool onlynew)
 
 		// Memory access needs to get locked
 		lock_shm();
-		bool newflag = client->new;
+		bool newflag = client->isNew;
 		size_t ippos = client->ippos;
 		size_t oldnamepos = client->namepos;
 		unlock_shm();
@@ -333,7 +333,7 @@ void resolveClients(const bool onlynew)
 		// Store obtained host name (may be unchanged)
 		client->namepos = newnamepos;
 		// Mark entry as not new
-		client->new = false;
+		client->isNew = false;
 		unlock_shm();
 	}
 
@@ -366,7 +366,7 @@ void resolveForwardDestinations(const bool onlynew)
 
 		// Memory access needs to get locked
 		lock_shm();
-		bool newflag = upstream->new;
+		bool newflag = upstream->isNew;
 		size_t ippos = upstream->ippos;
 		size_t oldnamepos = upstream->namepos;
 		unlock_shm();
@@ -386,7 +386,7 @@ void resolveForwardDestinations(const bool onlynew)
 		// Store obtained host name (may be unchanged)
 		upstream->namepos = newnamepos;
 		// Mark entry as not new
-		upstream->new = false;
+		upstream->isNew = false;
 		unlock_shm();
 	}
 

@@ -19,6 +19,7 @@
 
 #include "dnsmasq.h"
 #include "../dnsmasq_interface.h"
+#include "../domainindex.h"
 
 struct daemon *daemon;
 
@@ -675,6 +676,7 @@ int main_dnsmasq (int argc, char **argv)
 	}
     }
 
+    FTL_DomainIndexInit();
     FTL_fork_and_bind_sockets(ent_pw);
   
    log_err = log_start(ent_pw, err_pipe[1]);

@@ -138,6 +138,9 @@ $(_FTL_OBJ): $(ODIR)/%.o: $(IDIR)/%.c $(_FTL_DEPS) | $(ODIR) $(DB_OBJ_DIR) $(API
 $(_DNSMASQ_OBJ): $(DNSMASQ_OBJ_DIR)/%.o: $(IDIR)/dnsmasq/%.c $(_DNSMASQ_DEPS) | $(DNSMASQ_OBJ_DIR)
 	$(CC) -c -o $@ $< -g3 $(CCFLAGS) -DVERSION=\"$(DNSMASQ_VERSION)\" $(DNSMASQ_OPTS)
 
+$(ODIR)/domainindex.o: $(IDIR)/domainindex.cc
+	g++ -c -o $@ $< -g3 $(CCFLAGS)
+
 $(DB_OBJ_DIR)/sqlite3.o: $(IDIR)/database/sqlite3.c | $(DB_OBJ_DIR)
 	$(CC) -c -o $@ $< -g3 $(CCFLAGS)
 
@@ -153,8 +156,8 @@ $(API_OBJ_DIR):
 $(DNSMASQ_OBJ_DIR):
 	mkdir -p $(DNSMASQ_OBJ_DIR)
 
-pihole-FTL: $(_FTL_OBJ) $(_DNSMASQ_OBJ) $(DB_OBJ_DIR)/sqlite3.o
-	$(CC) $(CCFLAGS) -o $@ $^ $(LIBS)
+pihole-FTL: $(_FTL_OBJ) $(_DNSMASQ_OBJ) $(DB_OBJ_DIR)/sqlite3.o $(ODIR)/domainindex.o
+	g++ $(CCFLAGS) -o $@ $^ $(LIBS)
 
 .PHONY: clean force install
 

@@ -12,10 +12,11 @@
 
 // Definition of sqlite3_stmt
 #include "database/sqlite3.h"
+#include "domainindex.h"
 
 void strtolower(char *str);
 int findUpstreamID(const char * upstream, const bool count);
-int findDomainID(const char *domain, const bool count);
+//int findDomainID(const char *domain, const bool count);
 int findClientID(const char *client, const bool count);
 int findCacheID(int domainID, int clientID);
 bool isValidIPv4(const char *addr);
@@ -46,7 +47,7 @@ typedef struct {
 
 typedef struct {
 	unsigned char magic;
-	bool new;
+	bool isNew;
 	int count;
 	int failed;
 	size_t ippos;
@@ -55,7 +56,7 @@ typedef struct {
 
 typedef struct {
 	unsigned char magic;
-	bool new;
+	bool isNew;
 	int count;
 	int blockedcount;
 	int overTime[OVERTIME_SLOTS];

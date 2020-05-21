@@ -74,7 +74,7 @@ int findUpstreamID(const char * upstreamString, const bool count)
 	// Due to the nature of us being the resolver,
 	// the actual resolving of the host name has
 	// to be done separately to be non-blocking
-	upstream->new = true;
+	upstream->isNew = true;
 	upstream->namepos = 0; // 0 -> string with length zero
 	// Increase counter by one
 	counters->upstreams++;
@@ -82,6 +82,7 @@ int findUpstreamID(const char * upstreamString, const bool count)
 	return upstreamID;
 }
 
+/*
 int findDomainID(const char *domainString, const bool count)
 {
 	for(int domainID = 0; domainID < counters->domains; domainID++)
@@ -135,6 +136,7 @@ int findDomainID(const char *domainString, const bool count)
 
 	return domainID;
 }
+*/
 
 int findClientID(const char *clientIP, const bool count)
 {
@@ -192,7 +194,7 @@ int findClientID(const char *clientIP, const bool count)
 	// Due to the nature of us being the resolver,
 	// the actual resolving of the host name has
 	// to be done separately to be non-blocking
-	client->new = true;
+	client->isNew = true;
 	client->namepos = 0;
 	// No query seen so far
 	client->lastQuery = 0;
@@ -213,52 +215,52 @@ int findClientID(const char *clientIP, const bool count)
 	return clientID;
 }
 
-int findCacheID(int domainID, int clientID)
-{
-	// Compare content of client against known client IP addresses
-	for(int cacheID = 0; cacheID < counters->dns_cache_size; cacheID++)
-	{
-		// Get cache pointer
-		DNSCacheData* dns_cache = getDNSCache(cacheID, true);
+// int findCacheID(int domainID, int clientID)
+// {
+// 	// Compare content of client against known client IP addresses
+// 	for(int cacheID = 0; cacheID < counters->dns_cache_size; cacheID++)
+// 	{
+// 		// Get cache pointer
+// 		DNSCacheData* dns_cache = getDNSCache(cacheID, true);
 
-		// Check if the returned pointer is valid before trying to access it
-		if(dns_cache == NULL)
-			continue;
+// 		// Check if the returned pointer is valid before trying to access it
+// 		if(dns_cache == NULL)
+// 			continue;
 
-		if(dns_cache->domainID == domainID &&
-		   dns_cache->clientID == clientID)
-		{
-			return cacheID;
-		}
-	}
+// 		if(dns_cache->domainID == domainID &&
+// 		   dns_cache->clientID == clientID)
+// 		{
+// 			return cacheID;
+// 		}
+// 	}
 
-	// Get ID of new cache entry
-	const int cacheID = counters->dns_cache_size;
+// 	// Get ID of new cache entry
+// 	const int cacheID = counters->dns_cache_size;
 
-	// Check struct size
-	memory_check(DNS_CACHE);
+// 	// Check struct size
+// 	memory_check(DNS_CACHE);
 
-	// Get client pointer
-	DNSCacheData* dns_cache = getDNSCache(cacheID, false);
+// 	// Get client pointer
+// 	DNSCacheData* dns_cache = getDNSCache(cacheID, false);
 
-	if(dns_cache == NULL)
-	{
-		logg("ERROR: Encountered serious memory error in findCacheID()");
-		return -1;
-	}
+// 	if(dns_cache == NULL)
+// 	{
+// 		logg("ERROR: Encountered serious memory error in findCacheID()");
+// 		return -1;
+// 	}
 
-	// Initialize cache entry
-	dns_cache->magic = MAGICBYTE;
-	dns_cache->blocking_status = UNKNOWN_BLOCKED;
-	dns_cache->domainID = domainID;
-	dns_cache->clientID = clientID;
-	dns_cache->force_reply = 0u;
+// 	// Initialize cache entry
+// 	dns_cache->magic = MAGICBYTE;
+// 	dns_cache->blocking_status = UNKNOWN_BLOCKED;
+// 	dns_cache->domainID = domainID;
+// 	dns_cache->clientID = clientID;
+// 	dns_cache->force_reply = 0u;
 
-	// Increase counter by one
-	counters->dns_cache_size++;
+// 	// Increase counter by one
+// 	counters->dns_cache_size++;
 
-	return cacheID;
-}
+// 	return cacheID;
+// }
 
 bool isValidIPv4(const char *addr)
 {
