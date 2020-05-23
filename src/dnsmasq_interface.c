@@ -35,6 +35,7 @@
 #include "api/api.h"
 // global variable daemonmode
 #include "args.h"
+#include "thread.h"
 
 static void print_flags(const unsigned int flags);
 static void save_reply_type(const unsigned int flags, const union all_addr *addr,
@@ -1626,62 +1627,37 @@ void FTL_fork_and_bind_sockets(struct passwd *ent_pw)
 	else
 		savepid();
 
-	// We will use the attributes object later to start all threads in
-	// detached mode
-	pthread_attr_t attr;
-	// Initialize thread attributes object with default attribute values
-	pthread_attr_init(&attr);
-	// When a detached thread terminates, its resources are automatically
-	// released back to the system without the need for another thread to
-	// join with the terminated thread
-	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-
 	// Bind to sockets
 	bind_sockets();
 
 	// Start TELNET IPv4 thread
-	if(ipv4telnet && pthread_create( &telnet_listenthreadv4, &attr, telnet_listening_thread_IPv4, NULL ) != 0)
+	if(ipv4telnet)
 	{
-		logg("Unable to open IPv4 telnet listening thread. Exiting...");
-		exit(EXIT_FAILURE);
+		telnet_listenthreadv4 = create_thread_or_fail(telnet_listening_thread_IPv4,  "telnet-IPv4");
 	}
 
 	// Start TELNET IPv6 thread
-	if(ipv6telnet &&  pthread_create( &telnet_listenthreadv6, &attr, telnet_listening_thread_IPv6, NULL ) != 0)
+	if(ipv6telnet)
 	{
-		logg("Unable to open IPv6 telnet listening thread. Exiting...");
-		exit(EXIT_FAILURE);
+		telnet_listenthreadv6 = create_thread_or_fail(telnet_listening_thread_IPv6,  "telnet-IPv6");
 	}
 
 	// Start SOCKET thread
-	if(pthread_create( &socket_listenthread, &attr, socket_listening_thread, NULL ) != 0)
-	{
-		logg("Unable to open Unix socket listening thread. Exiting...");
-		exit(EXIT_FAILURE);
-	}
+	socket_listenthread = create_thread_or_fail(socket_listening_thread,  "socket listener");
 
 	// Start database thread if database is used
-	if(database && pthread_create( &DBthread, &attr, DB_thread, NULL ) != 0)
+	if(database)
 	{
-		logg("Unable to open database thread. Exiting...");
-		exit(EXIT_FAILURE);
+		DBthread = create_thread_or_fail(DB_thread,  "database");
 	}
 
 	// Start thread that will stay in the background until garbage
 	// collection needs to be done
-	if(pthread_create( &GCthread, &attr, GC_thread, NULL ) != 0)
-	{
-		logg("Unable to open GC thread. Exiting...");
-		exit(EXIT_FAILURE);
-	}
+	GCthread = create_thread_or_fail(GC_thread,  "housekeeper");
 
 	// Start thread that will stay in the background until host names
 	// needs to be resolved
-	if(pthread_create( &DNSclientthread, &attr, DNSclient_thread, NULL ) != 0)
-	{
-		logg("Unable to open DNS client thread. Exiting...");
-		exit(EXIT_FAILURE);
-	}
+	DNSclientthread = create_thread_or_fail(DNSclient_thread,  "DNS Client");
 
 	// Chown files if FTL started as user root but a dnsmasq config
 	// option states to run as a different user/group (e.g. "nobody")

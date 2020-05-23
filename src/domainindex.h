@@ -5,8 +5,6 @@
 extern "C" {
 #endif
 
-#include "FTL.h"
-
 void FTL_DomainIndexInit(void);
 int findDomainID(const char *domainString, const bool count);
 

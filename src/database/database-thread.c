@@ -25,9 +25,6 @@
 
 void *DB_thread(void *val)
 {
-	// Set thread name
-	prctl(PR_SET_NAME,"database",0,0,0);
-
 	// First check if the user doesn't want to use the database.
 	// If this is the case, we terminate the database thread as
 	// there is no point in having it around

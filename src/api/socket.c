@@ -441,9 +441,6 @@ void *telnet_listening_thread_IPv4(void *args)
 	// the system without the need for another thread to join with the terminated thread
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
-	// Set thread name
-	prctl(PR_SET_NAME,"telnet-IPv4",0,0,0);
-
 	// Listen as long as FTL is not killed
 	while(!killed)
 	{
@@ -482,9 +479,6 @@ void *telnet_listening_thread_IPv6(void *args)
 	// the system without the need for another thread to join with the terminated thread
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
-	// Set thread name
-	prctl(PR_SET_NAME,"telnet-IPv6",0,0,0);
-
 	// Listen as long as FTL is not killed
 	while(!killed)
 	{
@@ -522,9 +516,6 @@ void *socket_listening_thread(void *args)
 	// When a detached thread terminates, its resources are automatically released back to
 	// the system without the need for another thread to join with the terminated thread
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-
-	// Set thread name
-	prctl(PR_SET_NAME,"socket listener",0,0,0);
 
 	// Return early to avoid CPU spinning if Unix socket is not available
 	if(!sock_avail)

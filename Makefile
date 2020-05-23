@@ -19,7 +19,7 @@ FTL_DB_OBJ = database/common.o database/query-table.o database/network-table.o d
              database/sqlite3-ext.o database/message-table.o
 FTL_API_OBJ = api/socket.o api/request.o api/msgpack.o api/api.o
 FTL_OBJ = $(FTL_DB_OBJ) $(FTL_API_OBJ) main.o memory.o log.o daemon.o datastructure.o signals.o files.o setupVars.o args.o gc.o config.o \
-          dnsmasq_interface.o resolve.o regex.o shmem.o capabilities.o overTime.o timers.o vector.o
+          dnsmasq_interface.o resolve.o regex.o shmem.o capabilities.o overTime.o timers.o thread.o vector.o
 
 DNSMASQ_DEPS = config.h dhcp-protocol.h dns-protocol.h radv-protocol.h dhcp6-protocol.h dnsmasq.h ip6addr.h metrics.h ../dnsmasq_interface.h
 DNSMASQ_OBJ = arp.o dbus.o domain.o lease.o outpacket.o rrfilter.o auth.o dhcp6.o edns0.o log.o poll.o slaac.o blockdata.o dhcp.o forward.o \
@@ -49,7 +49,7 @@ GCCVERSION8 := $(shell expr `$(CC) -dumpversion | cut -f1 -d.` \>= 8)
 # -Wl,-z,defs: Detect and reject underlinking (phenomenon caused by missing shared library arguments when invoking the linked editor to produce another shared library)
 # -Wl,-z,now: Disable lazy binding
 # -Wl,-z,relro: Read-only segments after relocation
-HARDENING_FLAGS=-fstack-protector-strong -Wp,-D_FORTIFY_SOURCE=2 -O3 -Wl,-z,relro,-z,now -fexceptions -funwind-tables -fasynchronous-unwind-tables -Wl,-z,defs -Wl,-z,now -Wl,-z,relro
+HARDENING_FLAGS=-fstack-protector-strong -Wp,-D_FORTIFY_SOURCE=2 -O0 -Wl,-z,relro,-z,now -fexceptions -funwind-tables -fasynchronous-unwind-tables -Wl,-z,defs -Wl,-z,now -Wl,-z,relro
 DEBUG_FLAGS=-rdynamic -fno-omit-frame-pointer
 
 # -DSQLITE_OMIT_LOAD_EXTENSION: This option omits the entire extension loading mechanism from SQLite, including sqlite3_enable_load_extension() and sqlite3_load_extension() interfaces. (needs -ldl linking option, otherwise)
@@ -139,7 +139,7 @@ $(_DNSMASQ_OBJ): $(DNSMASQ_OBJ_DIR)/%.o: $(IDIR)/dnsmasq/%.c $(_DNSMASQ_DEPS) | 
 	$(CC) -c -o $@ $< -g3 $(CCFLAGS) -DVERSION=\"$(DNSMASQ_VERSION)\" $(DNSMASQ_OPTS)
 
 $(ODIR)/domainindex.o: $(IDIR)/domainindex.cc
-	g++ -c -o $@ $< -g3 $(CCFLAGS)
+	$(CXX) -c -o $@ $< -g3 $(CCFLAGS)
 
 $(DB_OBJ_DIR)/sqlite3.o: $(IDIR)/database/sqlite3.c | $(DB_OBJ_DIR)
 	$(CC) -c -o $@ $< -g3 $(CCFLAGS)
@@ -157,7 +157,7 @@ $(DNSMASQ_OBJ_DIR):
 	mkdir -p $(DNSMASQ_OBJ_DIR)
 
 pihole-FTL: $(_FTL_OBJ) $(_DNSMASQ_OBJ) $(DB_OBJ_DIR)/sqlite3.o $(ODIR)/domainindex.o
-	g++ $(CCFLAGS) -o $@ $^ $(LIBS)
+	$(CXX) $(CCFLAGS) -o $@ $^ $(LIBS)
 
 .PHONY: clean force install
 

@@ -10,8 +10,12 @@
 #ifndef FTL_H
 #define FTL_H
 
+#ifndef __USE_XOPEN
 #define __USE_XOPEN
+#endif
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include <stdio.h>
 // variable argument lists
 #include <stdarg.h>

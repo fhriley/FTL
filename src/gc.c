@@ -28,9 +28,6 @@ bool doGC = false;
 time_t lastGCrun = 0;
 void *GC_thread(void *val)
 {
-	// Set thread name
-	prctl(PR_SET_NAME,"housekeeper",0,0,0);
-
 	// Save timestamp as we do not want to store immediately
 	// to the database
 	lastGCrun = time(NULL) - time(NULL)%GCinterval;
